@@ -71,11 +71,11 @@ struct ContentView: View {
                 .offset(x: 0, y: 214)
                 
                 // Language Selector
-    HStack(alignment: .top, spacing: 3) {
+    HStack(spacing: 4) {
             Text("Language")
             .font(Font.custom("SF Pro", size: 16).weight(.bold))
             .foregroundColor(Color(red: 0, green: 0.53, blue: 1))
-            Image(systemName: "chevron.down")
+            Image(systemName: "chevron.up")
             .foregroundColor(Color(red: 0, green: 0.53, blue: 1))
                 }
                 .offset(x: 107.50, y: 376)
