@@ -80,11 +80,11 @@ struct ContentView: View {
       .shadow(
         color: Color(red: 0, green: 0, blue: 0, opacity: 0.25), radius: 4, y: 4
       )
-      Rectangle()
-        .foregroundColor(.clear)
-        .frame(width: 379, height: 313)
-        .background(Color(red: 0.50, green: 0.23, blue: 0.27).opacity(0.50))
-        .offset(x: 0.50, y: -204.50)
+        Image("ENS Image") // use your actual image asset name
+            .resizable()
+            .scaledToFit()
+            .frame(width: 379, height: 313)
+            .offset(x: 0.50, y: -204.50)
       HStack(alignment: .top, spacing: 3) {
         Text("Language")
               .font(Font.custom("SF Pro", size: 16).weight(.bold))
