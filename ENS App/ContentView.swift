@@ -57,7 +57,7 @@ struct FamilyView: View {
     
     var body: some View {
         Text(languageManager.text("familyPage"))
-            .navigationTitle(languageManager.text("familyLogin"))
+        .navigationTitle(languageManager.text("familyLogin"))
     }
 }
 
@@ -78,10 +78,10 @@ struct ContentView: View {
                 
                 // Logo / Header Image
          Image("ENS Image")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 379, height: 313)
-                    .offset(x: 0.50, y: -204.50)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 379, height: 313)
+                .offset(x: 0.50, y: -204.50)
                 
                 // Admin Login Button
         NavigationLink(destination: AdminView(languageManager: languageManager)) {
