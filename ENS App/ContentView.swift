@@ -1,7 +1,7 @@
 import SwiftUI
-
+ 
 // MARK: - Language Manager
-
+ 
 class LanguageManager: ObservableObject {
     @Published var currentLanguage: String = "English"
     
@@ -14,7 +14,8 @@ class LanguageManager: ObservableObject {
             "familyPage": "Inventory",
             "loading": "Loading inventory...",
             "failedLoad": "Failed to load inventory",
-            "requestItem": "To request an item, call:",
+            "requestItem": "Need something? Email us to request an item:",
+            "requestEmail": "Request an Item",
             "openSheet": "Open Inventory Sheet",
             "editSheet": "Edit the spreadsheet directly to update inventory",
             "itemName": "Item",
@@ -24,7 +25,8 @@ class LanguageManager: ObservableObject {
             "lowStock": "Low Stock",
             "outOfStock": "Out of Stock",
             "pullRefresh": "Pull to refresh",
-            "adminPanel": "Admin Panel"
+            "adminPanel": "Admin Panel",
+            "retry": "Retry"
         ],
         "Spanish": [
             "adminLogin": "Inicio Admin",
@@ -34,7 +36,8 @@ class LanguageManager: ObservableObject {
             "familyPage": "Inventario",
             "loading": "Cargando inventario...",
             "failedLoad": "Error al cargar inventario",
-            "requestItem": "Para solicitar un artículo, llame:",
+            "requestItem": "¿Necesita algo? Envíenos un correo para solicitar un artículo:",
+            "requestEmail": "Solicitar un artículo",
             "openSheet": "Abrir Hoja de Inventario",
             "editSheet": "Edite la hoja de cálculo directamente para actualizar el inventario",
             "itemName": "Artículo",
@@ -44,7 +47,8 @@ class LanguageManager: ObservableObject {
             "lowStock": "Stock Bajo",
             "outOfStock": "Agotado",
             "pullRefresh": "Jalar para actualizar",
-            "adminPanel": "Panel de Admin"
+            "adminPanel": "Panel de Admin",
+            "retry": "Reintentar"
         ],
         "Somali": [
             "adminLogin": "Galitaanka Admin",
@@ -54,7 +58,8 @@ class LanguageManager: ObservableObject {
             "familyPage": "Kaydka",
             "loading": "Rarida kaydka...",
             "failedLoad": "Waxaa ku guuldareystay rarida kaydka",
-            "requestItem": "Si aad u codsato shay, wac:",
+            "requestItem": "Ma u baahan tahay wax? Noo dir email si aad u codsato shay:",
+            "requestEmail": "Codsashada shay",
             "openSheet": "Fur Xaashida Kaydka",
             "editSheet": "Tifaftir xaashida si toos ah si loo cusboonaysiiyo kaydka",
             "itemName": "Shay",
@@ -64,7 +69,8 @@ class LanguageManager: ObservableObject {
             "lowStock": "Kayd Yar",
             "outOfStock": "Ka Maqan",
             "pullRefresh": "Jiid si aad u cusboonaysiisonoysato",
-            "adminPanel": "Xafiiska Admin"
+            "adminPanel": "Xafiiska Admin",
+            "retry": "Isku day mar kale"
         ]
     ]
     
@@ -72,9 +78,9 @@ class LanguageManager: ObservableObject {
         return translations[currentLanguage]?[key] ?? key
     }
 }
-
+ 
 // MARK: - Inventory Model
-
+ 
 struct InventoryItem: Identifiable {
     let id = UUID()
     let name: String
@@ -82,9 +88,9 @@ struct InventoryItem: Identifiable {
     let quantity: Int
     let status: String
 }
-
+ 
 // MARK: - Inventory View Model
-
+ 
 class InventoryViewModel: ObservableObject {
     @Published var items: [InventoryItem] = []
     @Published var isLoading = false
@@ -136,16 +142,14 @@ class InventoryViewModel: ObservableObject {
         }.resume()
     }
 }
-
+ 
 // MARK: - Admin View
-
+ 
 struct AdminView: View {
     @ObservedObject var languageManager: LanguageManager
     
     // ⚠️ REPLACE WITH YOUR SPREADSHEET ID
     let spreadsheetID = "YOUR_SPREADSHEET_ID"
-    // ⚠️ REPLACE WITH YOUR SCHOOL PHONE NUMBER
-    let phoneNumber = "5551234567"
     
     var body: some View {
         VStack(spacing: 24) {
@@ -160,12 +164,19 @@ struct AdminView: View {
             Divider()
             
             VStack(spacing: 16) {
-                // Open Google Sheet button
-                Link(destination: URL(string: "https://docs.google.com/spreadsheets/d/\(spreadsheetID)")!) {
+                // Open Google Sheet — opens in Safari (new tab)
+                Button(action: {
+                    if let url = URL(string: "https://docs.google.com/spreadsheets/d/\(spreadsheetID)") {
+                        UIApplication.shared.open(url, options: [:], completionHandler: nil)
+                    }
+                }) {
                     HStack {
                         Image(systemName: "tablecells.fill")
                         Text(languageManager.text("openSheet"))
                             .font(.headline)
+                        Spacer()
+                        Image(systemName: "arrow.up.right.square")
+                            .font(.subheadline)
                     }
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
@@ -186,16 +197,17 @@ struct AdminView: View {
         .navigationTitle(languageManager.text("adminPage"))
     }
 }
-
+ 
 // MARK: - Family View
-
+ 
 struct FamilyView: View {
     @ObservedObject var languageManager: LanguageManager
     @StateObject var viewModel = InventoryViewModel()
     
-    // ⚠️ REPLACE WITH YOUR SCHOOL PHONE NUMBER
-    let phoneNumber = "5551234567"
-    let displayPhone = "(555) 123-4567"
+    // ⚠️ REPLACE WITH YOUR SCHOOL EMAIL ADDRESS
+    let schoolEmail = "school@example.com"
+    // ⚠️ REPLACE WITH YOUR SCHOOL NAME (used in email subject)
+    let schoolName = "Your School Name"
     
     var body: some View {
         VStack(spacing: 0) {
@@ -218,7 +230,7 @@ struct FamilyView: View {
                         .font(.caption)
                         .foregroundColor(.gray)
                         .multilineTextAlignment(.center)
-                    Button("Retry") {
+                    Button(languageManager.text("retry")) {
                         viewModel.fetchInventory()
                     }
                     .padding(.horizontal, 24)
@@ -230,7 +242,7 @@ struct FamilyView: View {
                 Spacer()
                 
             } else {
-                // Inventory List
+                // Inventory List — read-only for families
                 List(viewModel.items) { item in
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
@@ -261,15 +273,30 @@ struct FamilyView: View {
                     viewModel.fetchInventory()
                 }
                 
-                // Call to Request Banner
-                VStack(spacing: 6) {
+                // Email Request Banner
+                VStack(spacing: 10) {
                     Text(languageManager.text("requestItem"))
                         .font(.subheadline)
                         .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
                     
-                    Link(displayPhone, destination: URL(string: "tel:\(phoneNumber)")!)
-                        .font(.title2.bold())
-                        .foregroundColor(Color(red: 0, green: 0.53, blue: 1))
+                    Button(action: {
+                        sendEmailRequest()
+                    }) {
+                        HStack {
+                            Image(systemName: "envelope.fill")
+                            Text(languageManager.text("requestEmail"))
+                                .font(.headline)
+                            Spacer()
+                            Image(systemName: "arrow.up.right.square")
+                                .font(.subheadline)
+                        }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color(red: 0, green: 0.53, blue: 1))
+                        .cornerRadius(12)
+                    }
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
@@ -282,27 +309,39 @@ struct FamilyView: View {
         }
     }
     
+    // Opens Mail app (or browser email client) with pre-filled fields
+    func sendEmailRequest() {
+        let subject = "Inventory Item Request – \(schoolName)"
+            .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let body = "Hello,\n\nI would like to request the following item(s):\n\n[Please list the items you need here]\n\nThank you."
+            .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        
+        if let url = URL(string: "mailto:\(schoolEmail)?subject=\(subject)&body=\(body)") {
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        }
+    }
+    
     func localizedStatus(_ status: String) -> String {
         switch status {
-        case "In Stock": return languageManager.text("inStock")
-        case "Low Stock": return languageManager.text("lowStock")
+        case "In Stock":     return languageManager.text("inStock")
+        case "Low Stock":    return languageManager.text("lowStock")
         case "Out of Stock": return languageManager.text("outOfStock")
-        default: return status
+        default:             return status
         }
     }
     
     func statusColor(_ status: String) -> Color {
         switch status {
-        case "In Stock": return .green
-        case "Low Stock": return .orange
+        case "In Stock":     return .green
+        case "Low Stock":    return .orange
         case "Out of Stock": return .red
-        default: return .gray
+        default:             return .gray
         }
     }
 }
-
+ 
 // MARK: - Main Content View
-
+ 
 struct ContentView: View {
     @StateObject var languageManager = LanguageManager()
     @State private var showLanguagePicker = false
@@ -412,9 +451,9 @@ struct ContentView: View {
         }
     }
 }
-
+ 
 // MARK: - Preview
-
+ 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
