@@ -97,8 +97,8 @@ class InventoryViewModel: ObservableObject {
     @Published var errorMessage: String?
     
     // ⚠️ REPLACE THESE WITH YOUR OWN VALUES
-    let apiKey = "AIzaSyBFobpx36VoMI1EDyPET4apHiWLlzNL-Ds"
-    let spreadsheetID = "1wUnJMRW70nGU0XmMYyYja_Crmn3_rMttwVTG--HhpHo"
+    let apiKey = ENSSecrets.apiKey()
+    let spreadsheetID = ENSSecrets.spreadsheetId()
     let range = "Sheet1!A2:D100"
     
     func fetchInventory() {
