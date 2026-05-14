@@ -97,8 +97,8 @@ class InventoryViewModel: ObservableObject {
     @Published var errorMessage: String?
     
     // ⚠️ REPLACE THESE WITH YOUR OWN VALUES
-    let apiKey = "YOUR_GOOGLE_API_KEY"
-    let spreadsheetID = "YOUR_SPREADSHEET_ID"
+    let apiKey = "AIzaSyBFobpx36VoMI1EDyPET4apHiWLlzNL-Ds"
+    let spreadsheetID = "1wUnJMRW70nGU0XmMYyYja_Crmn3_rMttwVTG--HhpHo"
     let range = "Sheet1!A2:D100"
     
     func fetchInventory() {
@@ -113,22 +113,32 @@ class InventoryViewModel: ObservableObject {
             return
         }
         
-        URLSession.shared.dataTask(with: url) { data, _, error in
+        URLSession.shared.dataTask(with: url) { data, response, error in
             DispatchQueue.main.async {
                 self.isLoading = false
-                
+
                 if let error = error {
                     self.errorMessage = error.localizedDescription
+                    print("❌ Network error: \(error.localizedDescription)")
                     return
                 }
-                
+
+                // Print EVERYTHING Google sends back
+                if let data = data, let raw = String(data: data, encoding: .utf8) {
+                    print("🔍 RAW RESPONSE: \(raw)")
+                }
+
+                if let httpResponse = response as? HTTPURLResponse {
+                    print("📡 HTTP STATUS: \(httpResponse.statusCode)")
+                }
+
                 guard let data = data,
                       let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                       let rows = json["values"] as? [[String]] else {
                     self.errorMessage = "Failed to load inventory"
                     return
                 }
-                
+
                 self.items = rows.compactMap { row in
                     guard row.count >= 4 else { return nil }
                     return InventoryItem(
@@ -149,7 +159,7 @@ struct AdminView: View {
     @ObservedObject var languageManager: LanguageManager
     
     // ⚠️ REPLACE WITH YOUR SPREADSHEET ID
-    let spreadsheetID = "YOUR_SPREADSHEET_ID"
+    let spreadsheetID = "1wUnJMRW70nGU0XmMYyYja_Crmn3_rMttwVTG--HhpHo"
     
     var body: some View {
         VStack(spacing: 24) {
@@ -166,7 +176,7 @@ struct AdminView: View {
             VStack(spacing: 16) {
                 // Open Google Sheet — opens in Safari (new tab)
                 Button(action: {
-                    if let url = URL(string: "https://docs.google.com/spreadsheets/d/\(spreadsheetID)") {
+                    if let url = URL(string: "https://docs.google.com/spreadsheets/d/\(spreadsheetID)/edit") {
                         UIApplication.shared.open(url, options: [:], completionHandler: nil)
                     }
                 }) {
@@ -203,11 +213,11 @@ struct AdminView: View {
 struct FamilyView: View {
     @ObservedObject var languageManager: LanguageManager
     @StateObject var viewModel = InventoryViewModel()
-    
+    @Environment(\.openURL) var openURL
     // ⚠️ REPLACE WITH YOUR SCHOOL EMAIL ADDRESS
-    let schoolEmail = "school@example.com"
+    let schoolEmail = "ephs@school.com"
     // ⚠️ REPLACE WITH YOUR SCHOOL NAME (used in email subject)
-    let schoolName = "Your School Name"
+    let schoolName = "Eden Prairie High School"
     
     var body: some View {
         VStack(spacing: 0) {
@@ -315,9 +325,15 @@ struct FamilyView: View {
             .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         let body = "Hello,\n\nI would like to request the following item(s):\n\n[Please list the items you need here]\n\nThank you."
             .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        
-        if let url = URL(string: "mailto:\(schoolEmail)?subject=\(subject)&body=\(body)") {
-            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+
+        // Try native Mail app first
+        if let mailURL = URL(string: "mailto:\(schoolEmail)?subject=\(subject)&body=\(body)"),
+           UIApplication.shared.canOpenURL(mailURL) {
+            UIApplication.shared.open(mailURL)
+        } else {
+            // Fallback: open Gmail in Safari
+            let gmailURL = URL(string: "https://mail.google.com/mail/?view=cm&to=\(schoolEmail)&su=\(subject)&body=\(body)")!
+            UIApplication.shared.open(gmailURL)
         }
     }
     
