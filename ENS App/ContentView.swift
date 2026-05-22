@@ -96,7 +96,7 @@ class InventoryViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     
-    // ⚠️ REPLACE THESE WITH YOUR OWN VALUES
+    //  REPLACE THESE WITH YOUR OWN VALUES
     let apiKey = ENSSecrets.apiKey()
     let spreadsheetID = ENSSecrets.spreadsheetId()
     let range = "Sheet1!A2:D100"
@@ -116,6 +116,9 @@ class InventoryViewModel: ObservableObject {
         URLSession.shared.dataTask(with: url) { data, response, error in
             DispatchQueue.main.async {
                 self.isLoading = false
+                if let data = data, let raw = String(data: data, encoding: .utf8) {
+                    print("🔍 RAW RESPONSE: \(raw)")
+                }
 
                 if let error = error {
                     self.errorMessage = error.localizedDescription
@@ -158,7 +161,7 @@ class InventoryViewModel: ObservableObject {
 struct AdminView: View {
     @ObservedObject var languageManager: LanguageManager
     
-    // ⚠️ REPLACE WITH YOUR SPREADSHEET ID
+    //  REPLACE WITH YOUR SPREADSHEET ID
     let spreadsheetID = "1wUnJMRW70nGU0XmMYyYja_Crmn3_rMttwVTG--HhpHo"
     
     var body: some View {
@@ -214,9 +217,9 @@ struct FamilyView: View {
     @ObservedObject var languageManager: LanguageManager
     @StateObject var viewModel = InventoryViewModel()
     @Environment(\.openURL) var openURL
-    // ⚠️ REPLACE WITH YOUR SCHOOL EMAIL ADDRESS
+    //  REPLACE WITH YOUR SCHOOL EMAIL ADDRESS
     let schoolEmail = "ephs@school.com"
-    // ⚠️ REPLACE WITH YOUR SCHOOL NAME (used in email subject)
+    //  REPLACE WITH YOUR SCHOOL NAME (used in email subject)
     let schoolName = "Eden Prairie High School"
     
     var body: some View {
