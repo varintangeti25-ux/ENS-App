@@ -23,8 +23,8 @@ let allSchools: [School] = [
     School(name: "Eagle Heights and Oak Point",    email: "EagleHeights@edenpr.org", sheetTab: "Eagle Heights and Oak Point"),
     School(name: "Eden Lake Elementary",         email: "EdenLake@edenpr.org",     sheetTab: "Eden Lake"),
     School(name: "Forest Hills Elementary",      email: "ForestHills@edenpr.org",  sheetTab: "Forest Hills"),
-    School(name: "Prairie View and Little Eagles", email: "PrairieView@edenpr.org",  sheetTab: "Prairie View + Little Eagles"),
-    School(name: "EP Online and TASSEL",           email: "eponline@edenpr.org",     sheetTab: "EP Online + TASSEL")
+    School(name: "Prairie View and Little Eagles", email: "PrairieView@edenpr.org",  sheetTab: "Prairie View and Little Eagles"),
+    School(name: "EP Online and TASSEL",           email: "eponline@edenpr.org",     sheetTab: "EP Online and TASSEL")
 ]
 
 // MARK: - Category Order
@@ -394,9 +394,13 @@ struct AdminLoginView: View {
                 .padding(.horizontal, 28)
 
                 // Navigation to admin panel when approved
-                NavigationLink(value: "adminView") {
+                NavigationLink(
+                    destination: AdminView(languageManager: languageManager),
+                    isActive: $navigateToAdmin
+                ) {
                     EmptyView()
-                }.navigationDestination(for: String.self){ _ in AdminView(languageManager: languageManager)}
+                }
+                .hidden()
 
                 // Continue button
                 Button(action: { checkAccess() }) {
